@@ -1,9 +1,9 @@
 FROM gradle:7.4.2-jdk17-alpine as BaseBuilder
 
-LABEL org.opencontainers.image.source = https://github.com/Darkside138/DiscordSoundboard
+LABEL org.opencontainers.image.source = https://github.com/mylosvai/DiscordSoundboard
 
 WORKDIR "/tmp"
-RUN git clone https://github.com/Darkside138/DiscordSoundboard.git
+RUN git clone https://github.com/mylosvai/DiscordSoundboard.git
 
 WORKDIR DiscordSoundboard
 RUN gradle assembleBootDist
