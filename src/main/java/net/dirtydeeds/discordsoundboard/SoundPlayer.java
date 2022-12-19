@@ -1,10 +1,13 @@
 package net.dirtydeeds.discordsoundboard;
 
 import com.sedmelluq.discord.lavaplayer.natives.ConnectorNativeLibLoader;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.track.*;
 import net.dirtydeeds.discordsoundboard.beans.SoundFile;
 import net.dirtydeeds.discordsoundboard.beans.User;
 import net.dirtydeeds.discordsoundboard.commands.*;
 import net.dirtydeeds.discordsoundboard.controllers.response.ChannelResponse;
+import net.dirtydeeds.discordsoundboard.controllers.response.AudioPositionInfoResponse;
 import net.dirtydeeds.discordsoundboard.listeners.*;
 import net.dirtydeeds.discordsoundboard.handlers.AudioHandler;
 import net.dirtydeeds.discordsoundboard.service.SoundService;
@@ -87,10 +90,12 @@ public class SoundPlayer {
         commandListener.addCommand(new ListCommand(this, botConfig));
         commandListener.addCommand(new PingCommand());
         commandListener.addCommand(new PlayCommand(this));
+        commandListener.addCommand(new PlayFromCommand(this));
         commandListener.addCommand(new RandomCommand(this));
         commandListener.addCommand(new ReloadCommand(this));
         commandListener.addCommand(new RemoveCommand(this, botConfig, soundService));
         commandListener.addCommand(new StopCommand(this));
+        commandListener.addCommand(new PauseCommand((this)));
         commandListener.addCommand(new URLCommand(this));
         commandListener.addCommand(new UserDetailsCommand(userService, this));
         commandListener.addCommand(new VolumeCommand(this));
@@ -143,6 +148,54 @@ public class SoundPlayer {
     }
 
     /**
+     * Pauses sound playback and returns the position of the track in MS or -1 depending on if pause was successful;
+     *
+     * @return boolean representing whether playback was stopped.
+     */
+    public long pause(String user, String voiceChannelId) {
+        Guild guild = getGuildForUserOrChannelId(user, voiceChannelId);
+        if (guild != null) {
+            AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+            if (handler != null) {
+                boolean paused = !handler.getPlayer().isPaused();
+                handler.getPlayer().setPaused(paused);
+
+                if(paused)
+                    return handler.getPlayer().getPlayingTrack().getPosition();
+                else
+                    return -1;
+                //handler.getPlayer().getPlayingTrack().getPosition();                                           
+            }
+        }
+
+        return -2;
+    }
+
+    public AudioPositionInfoResponse getCurrentAudioTrackInformation(String user, String voiceChannelId)
+    {
+        Guild guild = getGuildForUserOrChannelId(user, voiceChannelId);
+        if (guild != null) {
+            AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+            if (handler != null) {
+                
+                boolean paused = handler.getPlayer().isPaused();             
+                AudioTrack track = handler.getPlayer().getPlayingTrack();
+                if(track != null)
+                {
+                    AudioTrackInfo trackInfo =  handler.getPlayer().getPlayingTrack().getInfo();
+                    long pos = track.getPosition();
+                    AudioPositionInfoResponse response = new AudioPositionInfoResponse(pos, trackInfo.length, trackInfo.uri, paused);
+                    return response;   
+                }
+                            
+                                        
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns the current volume
      *
      * @return float representing the current volume.
@@ -189,6 +242,39 @@ public class SoundPlayer {
         } catch (Exception e) {
             throw new SoundPlaybackException("Problem playing random file.");
         }
+    }
+
+
+  
+
+    public boolean setPlayerPosition(String user, String voiceChannelId, long milliseconds)
+    {
+        Guild guild = getGuildForUserOrChannelId(user, voiceChannelId);
+        if (guild != null) {
+            AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+            if (handler != null) {       
+                AudioPlayer player = handler.getPlayer();
+                if(player != null)
+                {   
+                    AudioTrack track = player.getPlayingTrack();
+                    if(track != null)
+                    {
+                        track.setPosition(milliseconds);
+                    }
+                    LOG.info("Setting currently playing track position to " + milliseconds);
+                    return true;
+                }
+                handler.setSeekPosition(milliseconds);
+                //handler.getPlayer().setPaused(paused);                
+                //handler.getPlayer().getPlayingTrack().setPosition(milliseconds);
+                LOG.info("Setting position of next track to " + milliseconds);
+                return true;
+                //handler.getPlayer().getPlayingTrack().getPosition();                                           
+            }
+            LOG.error("GUILD == null");
+        }
+
+        return false;
     }
 
     /**
@@ -257,6 +343,13 @@ public class SoundPlayer {
         }
     }
 
+    /*
+     *          AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+            if (handler != null) {
+                boolean paused = handler.getPlayer().isPaused();
+                handler.getPlayer().setPaused(!paused);
+     */
+
     /**
      * Play file name requested. Will first try to load the file from the map of available sounds.
      *
@@ -270,6 +363,13 @@ public class SoundPlayer {
             if (guild == null) {
                 LOG.error("Guild is null or you're not in a voice channel the bot has permission to access. Have you added your bot to a guild? https://discord.com/developers/docs/topics/oauth2");
             } else {
+                AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+                if (handler != null) {
+                    handler.getPlayer().setPaused(false);
+                }
+                else{
+                    LOG.error("ERROR toggling pause() to off in playFile()");
+                }
                 fileToPlay = soundService.updateSoundPlayed(fileToPlay);
                 soundService.save(fileToPlay);
                 jdaBot.getPlayerManager().loadItem(soundFile.getAbsolutePath(), new FileLoadResultHandler(guild, repeatTimes));
@@ -290,6 +390,7 @@ public class SoundPlayer {
             AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
             if (handler != null) {
                 handler.getPlayer().stopTrack();
+                
                 return true;
             }
         }

@@ -18,9 +18,11 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private final AudioPlayer audioPlayer;
     private final long guildId;
     private AudioFrame lastFrame;
+    private long seekPosition;
 
     protected AudioHandler(PlayerManager manager, Guild guild, AudioPlayer player)
     {
+        seekPosition = -1;
         this.manager = manager;
         this.audioPlayer = player;
         this.guildId = guild.getIdLong();
@@ -41,6 +43,10 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return audioPlayer;
     }
 
+    public void setSeekPosition(long ms){
+        seekPosition = ms;
+    }
+
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         int repeatTimes = (int)track.getUserData();
@@ -49,6 +55,15 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             audioPlayer.playTrack(track.makeClone());
         }
     }
+    
+    @Override
+    public void onTrackStart(AudioPlayer player, AudioTrack track) {        
+            if(seekPosition != -1)
+            {   
+                track.setPosition(seekPosition);
+            }
+            seekPosition = -1;
+      }
 
     @Override
     public boolean canProvide() {
