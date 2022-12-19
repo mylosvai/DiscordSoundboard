@@ -7,11 +7,15 @@
     <!-- Layout by Jona, made for github.com/Darkside138/DiscordSoundboard -->
     <!-- Feel free to use as fit -->
     <title>Discord Soundboard</title>
-
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous" />
 
     <style>
+
+
         .bg-darker,.btn-secondary{
             background-color:rgba(25,25,25,0.7);
             border: none;
@@ -70,6 +74,44 @@
             50%{background-position:100% 19%}
             100%{background-position:0% 82%}
         }
+		
+		#wrapper {
+    padding-left: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    right: 250px;
+    width: 0;
+    height: 100%;
+    margin-right: -250px;
+    overflow-y: auto;
+    background: #222;
+	color: white;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+}
+
+#wrapper {
+    padding-right: 250px;
+}
+
+#sidebar-wrapper {
+    width: 250px;
+}
+
     </style>
 </head>
 <body class="bg-dark">
@@ -81,6 +123,29 @@
                 <a class="nav-link active" href="#" data-category="All">All</a>
             </li>
         </ul>
+		
+		<ul id="categories" class="navbar-nav" >
+            <li class="nav-item">               
+				
+            </li>
+			  <li class="nav-item" >				
+				 <input type="range"  style="width:30% !important; position: absolute; width: auto; top: 10%; left: 50%; transform: translateX(-50%); text-align: center;" 
+							class="form-range" id="playbackLocation" min="0" max="100" step="0.1" value="100">
+							
+							
+				 <div style="color: white; width:30% !important; position: absolute; width: auto;  top: 50%; left: 50%; transform: translateX(-50%); text-align: center;">
+				 <a id="pause" href="#"><i class="fas fa-play-circle" style="color: white" id="playButton"></i> <i class="fas fa-pause-circle" style="color: white" id="pauseButton"></i>      </a> 
+				 <p id="trackInfo" style="display: inline;"></p>
+				 </div>
+				 <!--<div style="color: white; width:30% !important; position: absolute; width: auto;  top: 50%; left: 55%; transform: translateX(-45%); text-align: center;">
+				 Test
+				 </div>-->
+				 <!--<input type="range"  style="width:30% !important; float: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"class="form-range" id="progressSlider" min="0" max="100" step="0.1" value="0">-->
+				 
+            </li>
+        </ul>
+		
+		
         <ul class="navbar-nav mr-auto">
             <li id="more" class="nav-item dropdown" style="display:none;">
                 <a class="nav-link dropdown-toggle" href="#" id="moreLabel" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -90,19 +155,28 @@
                 </div>
             </li>
         </ul>
+		
+		<!--<input type="text" id="playbackLocation" value="1"></input>-->
+<!--<input type="range" class="form-range" id="progressSlider" min="0" max="100" step="0.1" value="0">-->
         <ul class="navbar-nav">
+		
+		
             <li class="nav-item">
-                <a id="random" class="nav-link" href="#"><i class="fas fa-fw fa-random"></i></a>
+                <a id="random" class="nav-link" href="#"><i class="fas fa-fw fa-random"></i></a>				
             </li>
             <li class="nav-item">
-                <a id="stop" class="nav-link" href="#"><i class="fas fa-fw fa-ban"></i></a>
+                <a id="stop" class="nav-link" href="#"><i class="fas fa-fw fa-ban"></i></a>								
             </li>
-            <li id="settings" class="nav-item dropdown">
-                <a class="nav-link" href="#" id="settingsLabel" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-fw fa-cogs"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="settingsLabel">
-                    <form class="px-3 pt-2">
+			<!--<li class="nav-item">
+                <a id="pause" class="nav-link" href="#"><i class="fas fa-pause-circle"></i></a>								
+            </li>-->
+
+        </ul>
+    </div>
+</nav>
+<div id="wrapper">
+    <div id="sidebar-wrapper">
+                           <form class="px-3 pt-2">
                         <div class="form-group">
                             <label for="search">Search</label>
                             <input id="search" class="form-control" type="search" placeholder="Sound title">
@@ -121,16 +195,39 @@
                             <label class="custom-control-label" for="rgb">RGB</label>
                         </div>
                     </form>
-                </div>
-            </li>
-        </ul>
     </div>
-</nav>
+	
+	 <div id="page-content-wrapper">
+	
 <div id="sounds" class="container-fluid p-3"></div>
+</div>
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha256-OUFW7hFO0/r5aEGTQOz9F/aXQOt+TwqI1Z4fbVvww04=" crossorigin="anonymous"></script>
 <script type="text/javascript">
+
+$( document ).ready(function() {
+	$("#pauseButton").hide();
+});
+
+function updateSelectFromCookie()
+{
+	if($.cookie('remember_select') != null) {
+    // set the option to selected that corresponds to what the cookie is set to
+    $('.custom-select option[value="' + $.cookie('remember_select') + '"]').attr('selected', 'selected');
+}
+}
+
+
+// when a new option is selected this is triggered
+$('.custom-select').change(function() {
+    // new cookie is set when the option is changed
+    $.cookie('remember_select', $('.custom-select option:selected').val(), { expires: 90, path: '/'});
+	console.log($.cookie('remember_select'));
+});
+
     $(function() {
         var category = 'All';
 
@@ -177,7 +274,7 @@
             // Play sound
             $.ajax({
                 method: "POST",
-                url: "/bot/playFile?soundFileId=" + this.id + "&username=" + $('#user').val()
+                url: "/bot/playFile?soundFileId=" + this.id + "&username=" + $('#user').val() + "&playerPosition=1"
             });
         }).on('click', '#random', function(){
             // Play random sound
@@ -190,6 +287,12 @@
             $.ajax({
                 method: "POST",
                 url: "/bot/stop?username=" + $('#user').val()
+            });
+		}).on('click', '#pause', function(){
+            // pause sound
+            $.ajax({
+                method: "POST",
+                url: "/bot/pause?username=" + $('#user').val()
             });
         }).on('change', '#rgb', function(){
             // Enable RGB
@@ -259,6 +362,7 @@
             $.each(users, function(i, obj){
                 $('#user').append('<option value="' + obj.id + '"' + ((obj.selected) ? 'selected' : '') + '>' + obj.username + '</option>');
             });
+			updateSelectFromCookie();
         });
 
 <!--        // Get channels-->
@@ -289,6 +393,95 @@
             determineShownNavigation();
         });
     });
-    </script>
+	
+$("#playbackLocation").on("change", function() {
+    //do something
+	
+	var percentBar = $("#playbackLocation").val() / 100;
+	percentBar = Math.round(window.totalDataLength * percentBar);
+	console.log("setting position to [" + percentBar + "] of " + window.totalDataLength);
+	
+	            $.ajax({
+                method: "POST",
+                url: "/bot/setPosition?username=" + $('#user').val() + "&playerPosition=" + percentBar
+            });
+	
+	//console.log();
+});
+
+
+
+
+var intervalId = window.setInterval(function(){
+  // call your function here
+  //$("#progressSlider").val($("#progressSlider").val() + 1);
+  //var val = $("#progressSlider").val();
+
+//$('#user').val()
+/*
+ $.ajax({
+                method: "GET",
+                url: "/bot/volume?username=" + $('#user').val() + "&voiceChannelId=" + $('#channel').val()
+            }).done(function( data ) {
+                $('#volume').val(data);
+            });*/
+			//http://127.0.0.1:8080/bot/position?username=DonutBeMad
+			 $.ajax({
+                method: "GET",
+                url: "/bot/position?username=" + $('#user').val() + "&voiceChannelId=" + $('#channel').val()
+            }).done(function( data ) {
+//                $('#volume').val(data);
+
+							 
+				  //console.log(data.totalLength);
+				  //console.log($('#progressSlider').attr('max'));		
+					if(data.totalLength == -1 || data.currentPosition == -1)
+					{
+					window.totalDataLength = 1;
+					window.currentPosition = 1;
+					$("#trackInfo").text("");
+					$("#pauseButton").hide();
+					$("#playButton").hide();
+					$("#playbackLocation").val(100);				  
+					}
+					else
+					{
+				var percent = (data.currentPosition / data.totalLength) * 100;
+			//	console.log( percent );
+				$("#playbackLocation").val(percent);
+				  window.totalDataLength = data.totalLength;
+				  window.currentPosition = data.currentPosition;
+				  var filename = data.title.split(/[\\\/]/).pop();
+				  //console.log(filename);
+				  $("#trackInfo").text(`${filename} [${millisToMinutesAndSeconds(data.currentPosition)} / ${millisToMinutesAndSeconds(data.totalLength)} ]`);				  
+				  
+				  if(data.paused)
+				  {
+				  $("#pauseButton").hide();
+				  $("#playButton").show();
+				  }
+				  else
+				  {
+				  $("#pauseButton").show();
+				  $("#playButton").hide();
+				  }
+				  }
+				  
+            });
+			
+			//var filename = fullPath.split(/[\\\/]/).pop();
+  
+  //console.log(val);
+}, 1000);
+
+function millisToMinutesAndSeconds(millis) {
+  var minutes = Math.floor(millis / 60000);
+  var seconds = ((millis % 60000) / 1000).toFixed(0);
+  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+}
+
+jQuery.cookie=function(e,o,i){if(void 0===o){var n=null;if(document.cookie&&""!=document.cookie)for(var r=document.cookie.split(";"),t=0;t<r.length;t++){var p=jQuery.trim(r[t]);if(p.substring(0,e.length+1)==e+"="){n=decodeURIComponent(p.substring(e.length+1));break}}return n}i=i||{},null===o&&(o="",i.expires=-1);var s,u="";i.expires&&("number"==typeof i.expires||i.expires.toUTCString)&&("number"==typeof i.expires?(s=new Date).setTime(s.getTime()+24*i.expires*60*60*1e3):s=i.expires,u="; expires="+s.toUTCString());var c=i.path?"; path="+i.path:"",m=i.domain?"; domain="+i.domain:"",a=i.secure?"; secure":"";document.cookie=[e,"=",encodeURIComponent(o),u,c,m,a].join("")};
+
+</script>
 </body>
 </html>
